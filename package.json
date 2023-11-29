@@ -9,9 +9,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "My Portfolio - Julien",
+      "title": "Mon Portfolio margin",
       "subtitle": "Binance",
-      "description": "Show your Binance portfolio with the current value in USDT for each currency",
+      "description": "Affichez votre portefeuille margin Binance avec la valeur actuelle en USDT pour chaque devise",
       "mode": "view"
     }
   ],
