@@ -1,9 +1,9 @@
 <p align="center">
    <img src="assets/binance-logo.png" height="128">
-   <h1 align="center">Portefeuille Binance</h1>
+   <h1 align="center">Portefeuille Binance en margin</h1>
 </p>
 
-C'est une extension [Raycast](https://raycast.com/) qui vous permet de vérifier facilement votre portefeuille Binance.
+Extension [Raycast](https://raycast.com/) qui vous permet de vérifier facilement votre portefeuille Binance.
 
 ### Configuration de la `Clé API` et du `Secret API` de Binance
 
