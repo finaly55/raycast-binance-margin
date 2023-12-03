@@ -31,12 +31,37 @@
       "title": "Binance API Secret",
       "description": "Generate on: https://www.binance.com/en/my/settings/api-management",
       "placeholder": "www.binance.com/en/my/settings/api-management"
+    },
+    {
+      "name": "kucoin_api_key",
+      "type": "password",
+      "required": false,
+      "title": "Kucoin API Key",
+      "description": "Generate on: https://www.kucoin.com/en/my/settings/api-management",
+      "placeholder": "www.kucoin.com/en/my/settings/api-management"
+    },
+    {
+      "name": "kucoin_api_secret",
+      "type": "password",
+      "required": false,
+      "title": "Kucoin API Secret",
+      "description": "Generate on: https://www.kucoin.com/en/my/settings/api-management",
+      "placeholder": "www.kucoin.com/en/my/settings/api-management"
+    },
+    {
+      "name": "kucoin_passphrase",
+      "type": "password",
+      "required": false,
+      "title": "Kucoin passphrase",
+      "description": "Generate on: https://www.kucoin.com/en/my/settings/api-management",
+      "placeholder": "www.kucoin.com/en/my/settings/api-management"
     }
   ],
   "dependencies": {
     "@binance/connector": "^3.0.0",
     "@raycast/api": "^1.25.0",
     "axios": "^1.6.2",
+    "kucoin-node-sdk": "^1.0.5",
     "moment": "^2.29.4",
     "node-binance-api": "^0.13.0",
     "node-fetch": "^3.0.0",

@@ -1,5 +1,8 @@
+import path from "path";
 import { BinanceError, PortfolioEntry } from "./models/portfolio";
 import axios from "axios";
+import { environment } from "@raycast/api";
+import fs from "fs";
 
 export function numberToString(number: number | null) {
   if (!number) {
@@ -105,6 +108,12 @@ export function getTimestampXDaysAgo(daysAgo: number): number {
   // Obtenez le timestamp en millisecondes
   const timestampXDaysAgo: number = parseInt(xDaysAgo.valueOf().toString().slice(0, -3));
   return timestampXDaysAgo;
+}
+
+export function getIcon(assetCurrency: any) {
+  const iconPath = path.join(environment.assetsPath, `currency/${assetCurrency.toLowerCase()}.png`);
+  const icon = fs.existsSync(iconPath) ? `currency/${assetCurrency.toLowerCase()}.png` : `currency/generic.png`;
+  return icon;
 }
 
 export function getBinanceDataByRequests(
