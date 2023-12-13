@@ -4,7 +4,7 @@
   "title": "Binance Portfolio",
   "description": "Track your Binance portfolio",
   "icon": "binance-logo.png",
-  "author": "grzegorzkrukowski",
+  "author": "Julien Lbt",
   "license": "MIT",
   "commands": [
     {

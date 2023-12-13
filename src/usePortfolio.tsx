@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Toast, showToast } from "@raycast/api";
-import { PortfolioEntry, PortfolioState } from "./models/portfolio";
+import { PortfolioEntry, PortfolioState, TypeFilter } from "./models/portfolio";
 import { compareUSDTPlusValue, compareUSDTValue, isBinanceError } from "./utilities";
 import KucoinService from "./services/KucoinService";
 import BinanceService from "./services/BinanceService";
@@ -23,7 +23,7 @@ export function usePortfolio() {
     fetchPortfolio();
   }, []);
 
-  function changeType(type: string) {
+  function changeType(type: TypeFilter) {
     setState((oldState) => ({
       ...oldState,
       type,
@@ -40,7 +40,7 @@ export function usePortfolio() {
     } else {
       setState((oldState) => ({
         ...oldState,
-        portfolio: oldState.portfolio?.sort(compareUSDTPlusValue).reverse(),
+        portfolio: oldState.portfolio?.sort((a, b) => compareUSDTPlusValue(a, b, state.type)).reverse(),
       }));
 
       state.sortByUSDTValue = true;

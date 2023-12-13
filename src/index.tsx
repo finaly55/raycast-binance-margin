@@ -1,7 +1,7 @@
 import { Action, ActionPanel, List } from "@raycast/api";
-import { formatNombre, getColorChange, numberToString, subtitleFor } from "./utilities";
+import { formatNombre, getColorChange, getTypeFilter, numberToString, subtitleFor } from "./utilities";
 import { usePortfolio } from "./usePortfolio";
-import { PortfolioEntry } from "./models/portfolio";
+import { PortfolioEntry, PortfolioState, TypeFilter } from "./models/portfolio";
 
 export default function BalanceList() {
   const { state } = usePortfolio();
@@ -33,9 +33,10 @@ export default function BalanceList() {
         }
         actions={
           <ActionPanel>
-            {state.type === "1d" && <Action title={"Inverser le trie"} onAction={() => state.sort()} />}
+            {<Action title={"Inverser le trie"} onAction={() => state.sort()} />}
             <Action title="P/L sur 1 jour" onAction={() => state.changeType("1d")} />
             <Action title="P/L sur 7 jours" onAction={() => state.changeType("7d")} />
+            <Action title="P/L sur 30 jours" onAction={() => state.changeType("30d")} />
             <Action title="P/L sur 1 heure" onAction={() => state.changeType("1h")} />
           </ActionPanel>
         }
@@ -47,7 +48,7 @@ export default function BalanceList() {
   );
 }
 
-export function CurrencyItem(props: { portfolioEntry: PortfolioEntry; state: any }) {
+export function CurrencyItem(props: { portfolioEntry: PortfolioEntry; state: PortfolioState }) {
   const portfolioEntry = props.portfolioEntry;
   const tradeToCurrency = portfolioEntry.tradeToCurrency;
   let tradeURL = `https://www.binance.com/`;
@@ -55,63 +56,28 @@ export function CurrencyItem(props: { portfolioEntry: PortfolioEntry; state: any
   if (tradeToCurrency) {
     tradeURL += `en/trade/${portfolioEntry.currency}_USDT?layout=basic`;
   }
+  console.log(portfolioEntry[getTypeFilter(props.state.type)].percent);
 
   return (
     <List.Item
       id={portfolioEntry.currency}
-      key={portfolioEntry.currency}
+      key={Math.floor(Math.random() * 1000000) + 1}
       title={portfolioEntry.currency ? portfolioEntry.currency : ""}
       subtitle={Math.round(portfolioEntry.usdPrice * 100) / 100 + "$"}
       accessories={[
         { text: subtitleFor(portfolioEntry) },
-        props.state.type === "1d"
-          ? {
-              tag: {
-                value: numberToString(Math.round(portfolioEntry.change_percent * 10) / 10) + "%",
-                color: getColorChange(portfolioEntry.change_percent),
-              },
-            }
-          : {},
-        props.state.type === "1d"
-          ? {
-              tag: {
-                value: numberToString(Math.round(portfolioEntry.change_value)) + "$",
-                color: getColorChange(Math.round(portfolioEntry.change_value)),
-              },
-            }
-          : {},
-        props.state.type === "7d"
-          ? {
-              tag: {
-                value: numberToString(Math.round(portfolioEntry.stats7d?.percent * 10) / 10) + "%",
-                color: getColorChange(portfolioEntry.stats7d?.percent),
-              },
-            }
-          : {},
-        props.state.type === "7d"
-          ? {
-              tag: {
-                value: numberToString(Math.round(portfolioEntry.stats7d?.value)) + "$",
-                color: getColorChange(Math.round(portfolioEntry.stats7d?.value)),
-              },
-            }
-          : {},
-        props.state.type === "1h"
-          ? {
-              tag: {
-                value: numberToString(Math.round(portfolioEntry.stats1h?.percent * 10) / 10) + "%",
-                color: getColorChange(portfolioEntry.stats1h?.percent),
-              },
-            }
-          : {},
-        props.state.type === "1h"
-          ? {
-              tag: {
-                value: numberToString(Math.round(portfolioEntry.stats1h?.value)) + "$",
-                color: getColorChange(Math.round(portfolioEntry.stats1h?.value)),
-              },
-            }
-          : {},
+        {
+          tag: {
+            value: numberToString(Math.round(portfolioEntry[getTypeFilter(props.state.type)].percent * 10) / 10) + "%",
+            color: getColorChange(portfolioEntry[getTypeFilter(props.state.type)].percent),
+          },
+        },
+        {
+          tag: {
+            value: numberToString(Math.round(portfolioEntry[getTypeFilter(props.state.type)].value)) + "$",
+            color: getColorChange(Math.round(portfolioEntry[getTypeFilter(props.state.type)].value)),
+          },
+        },
       ]}
       icon={portfolioEntry.icon}
       actions={

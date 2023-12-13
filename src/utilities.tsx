@@ -1,5 +1,5 @@
 import path from "path";
-import { BinanceError, PortfolioEntry } from "./models/portfolio";
+import { BinanceError, PortfolioEntry, TypeFilter, TypeFilterAttribute } from "./models/portfolio";
 import axios from "axios";
 import { environment } from "@raycast/api";
 import fs from "fs";
@@ -48,7 +48,7 @@ export function compareUSDTValue(a: PortfolioEntry, b: PortfolioEntry) {
   return result;
 }
 
-export function compareUSDTPlusValue(a: PortfolioEntry, b: PortfolioEntry) {
+export function compareUSDTPlusValue(a: PortfolioEntry, b: PortfolioEntry, type: any) {
   if (a.currency === "ETH") {
     return 1;
   } else if (b.currency === "ETH") {
@@ -61,7 +61,7 @@ export function compareUSDTPlusValue(a: PortfolioEntry, b: PortfolioEntry) {
     return -1;
   }
 
-  const result = a.change_value - b.change_value;
+  const result = a[getTypeFilter(type)].percent - b[getTypeFilter(type)].percent;
 
   if (result == 0) {
     return b.currency.localeCompare(a.currency);
@@ -160,4 +160,51 @@ export function getBinanceDataByRequests(
       }
     })(startTime);
   });
+}
+
+export function getTypeFilter(type: any): TypeFilterAttribute {
+  return ("stats" + type) as TypeFilterAttribute;
+}
+
+export function calculerAugmentation(prixInitial: any, prixFinal: any): number {
+  try {
+    // Assurez-vous que les valeurs entrées sont des nombres positifs
+    if (isNaN(prixInitial) || isNaN(prixFinal) || prixInitial < 0 || prixFinal < 0) {
+      throw new Error("Veuillez entrer des valeurs numériques positives.");
+    }
+
+    // Calcul de l'augmentation en pourcentage
+    const augmentation: number = ((prixFinal - prixInitial) / prixInitial) * 100;
+
+    return augmentation;
+  } catch (error: any) {
+    return error.message;
+  }
+}
+
+export function getValueFromTicker(marker: any, days: number, available: number) {
+  const daysARetirer = days > marker.length - 1 ? marker.length - 1 : days;
+  const price = marker[marker.length - 1 - daysARetirer][1];
+  const priceBefore = marker[marker.length - 1 - daysARetirer + 1][1];
+
+  const stats = {
+    value: 0,
+    percent: 0,
+  };
+
+  return stats;
+}
+
+export function convertirDateEnTimestamp(dateISO: string): number | string {
+  try {
+    const date = new Date(dateISO);
+    if (isNaN(date.getTime())) {
+      throw new Error("Format de date invalide. Utilisez le format ISO, par exemple, '2019-10-01'.");
+    }
+
+    const timestamp = Math.floor(date.getTime() / 1000);
+    return timestamp;
+  } catch (error: any) {
+    return error.message;
+  }
 }

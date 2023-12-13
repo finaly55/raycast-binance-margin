@@ -36,6 +36,10 @@ class BinanceService {
         const available = currency.netAsset;
         const change_percent = assets24h.find((cur: { symbol: string }) => cur.symbol === asset)?.priceChangePercent;
         const change_value = assets24h.find((cur: { symbol: string }) => cur.symbol === asset)?.priceChange * available;
+        const stats1d = {
+          value: change_value,
+          percent: change_percent,
+        };
         const priceAPI = await client.tickerPrice(asset);
         const price = priceAPI.data.price;
         const tradeToCurrency = currency.asset === "USDT" ? null : "BTC";
@@ -46,12 +50,24 @@ class BinanceService {
         total24h += change_value;
         total += usdValue;
 
+        const price30d = await getBinanceDataByRequests(
+          asset,
+          "1d",
+          moment().subtract(31, "days").format("YYYY-MM-DD HH:mm:ss"),
+          moment().subtract(30, "days").format("YYYY-MM-DD HH:mm:ss")
+        );
+
         const price7d = await getBinanceDataByRequests(
           asset,
           "1d",
           moment().subtract(8, "days").format("YYYY-MM-DD HH:mm:ss"),
           moment().subtract(7, "days").format("YYYY-MM-DD HH:mm:ss")
         );
+
+        const stats30d = {
+          value: usdValue - price30d[0].open * available,
+          percent: 100 - (price30d[0].open * available * 100) / usdValue,
+        };
 
         const stats7d = {
           value: usdValue - price7d[0].open * available,
@@ -74,11 +90,11 @@ class BinanceService {
           available,
           usdPrice,
           usdValue,
-          change_percent,
-          change_value,
           tradeToCurrency,
           icon,
+          stats1d,
           stats7d,
+          stats30d,
           stats1h,
         } as PortfolioEntry;
       } catch (error) {

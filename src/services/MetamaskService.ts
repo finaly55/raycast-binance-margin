@@ -24,8 +24,14 @@ class MetamaskService {
           usdPrice: asset.value.price,
           usdValue: available * asset.value.price,
           available,
-          change_percent: asset.value.pricePercentChange1d,
-          change_value: available * asset.value.priceChange1d,
+          stats30d: {
+            value: 0,
+            percent: 0,
+          },
+          stats1d: {
+            value: available * asset.value.priceChange1d,
+            percent: asset.value.pricePercentChange1d,
+          },
           icon: icon,
           stats7d: {
             value: asset.value.price + asset.value.price * asset.value.pricePercentChange7h,

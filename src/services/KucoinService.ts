@@ -35,10 +35,16 @@ class KucoinService {
           usdPrice: tickerAsset.last,
           usdValue: available * tickerAsset.last,
           available,
-          change_percent: tickerAsset.changeRate * 100,
-          change_value: tickerAsset.last * tickerAsset.changeRate * available,
+          stats1d: {
+            value: tickerAsset.last * tickerAsset.changeRate * available,
+            percent: tickerAsset.changeRate * 100,
+          },
           icon: icon,
           stats7d: {
+            value: 0,
+            percent: 0,
+          },
+          stats30d: {
             value: 0,
             percent: 0,
           },
