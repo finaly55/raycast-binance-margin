@@ -59,6 +59,7 @@
   ],
   "dependencies": {
     "@binance/connector": "^3.0.0",
+    "@binance/connector-typescript": "^0.3.4",
     "@raycast/api": "^1.25.0",
     "axios": "^1.6.2",
     "kucoin-node-sdk": "^1.0.5",

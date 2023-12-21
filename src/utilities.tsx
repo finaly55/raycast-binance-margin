@@ -136,9 +136,9 @@ export function getBinanceDataByRequests(
           headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
         });
 
-        data.push(...response.data.map((item) => ({ open_time: item.open_time })));
+        data.push(...response.data.map((item) => ({ open_time: item?.open_time })));
 
-        const lastTimestamp: number = data[data.length - 1].open_time + 1;
+        const lastTimestamp: number = data[data.length - 1]?.open_time + 1;
 
         if (lastTimestamp < endTime) {
           await fetchData(lastTimestamp);

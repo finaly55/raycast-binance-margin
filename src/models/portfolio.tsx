@@ -14,6 +14,8 @@ export type PortfolioEntry = {
 };
 
 type Stats = {
+  usdValueAsset: number;
+  changeAvaibility: number;
   value: number;
   percent: number;
 };

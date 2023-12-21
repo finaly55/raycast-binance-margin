@@ -15,6 +15,51 @@ class KucoinService {
     let total = 0;
     let total24h = 0;
 
+    // correction portefeuille
+    marginAccount.data.accounts = [
+      ...marginAccount.data.accounts,
+      {
+        currency: "ZEN",
+        totalBalance: 8.71,
+        liability: 0,
+      },
+      {
+        currency: "OSMO",
+        totalBalance: 288,
+        liability: 0,
+      },
+      {
+        currency: "CRO",
+        totalBalance: 812.6869,
+        liability: 0,
+      },
+      {
+        currency: "SCRT",
+        totalBalance: 152.2679,
+        liability: 0,
+      },
+      {
+        currency: "ATOM",
+        totalBalance: 53.95,
+        liability: 0,
+      },
+      {
+        currency: "XAVA",
+        totalBalance: 366.6745,
+        liability: 0,
+      },
+      {
+        currency: "WAXL",
+        totalBalance: 97.511,
+        liability: 0,
+      },
+      {
+        currency: "USDC", //
+        totalBalance: 104,
+        liability: 0,
+      },
+    ];
+
     const assets = marginAccount.data.accounts
       .filter((asset: any) => asset.totalBalance > 0 || asset.liability > 0)
       .map((asset: any) => {

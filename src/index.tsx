@@ -56,7 +56,6 @@ export function CurrencyItem(props: { portfolioEntry: PortfolioEntry; state: Por
   if (tradeToCurrency) {
     tradeURL += `en/trade/${portfolioEntry.currency}_USDT?layout=basic`;
   }
-  console.log(portfolioEntry[getTypeFilter(props.state.type)].percent);
 
   return (
     <List.Item
@@ -65,6 +64,19 @@ export function CurrencyItem(props: { portfolioEntry: PortfolioEntry; state: Por
       title={portfolioEntry.currency ? portfolioEntry.currency : ""}
       subtitle={Math.round(portfolioEntry.usdPrice * 100) / 100 + "$"}
       accessories={[
+        portfolioEntry.stats30d.changeAvaibility
+          ? {
+              tag: {
+                value:
+                  numberToString(Math.round(portfolioEntry.stats30d.changeAvaibility)) +
+                  " soit " +
+                  numberToString(
+                    Math.round(portfolioEntry.stats30d.changeAvaibility * portfolioEntry.stats30d.usdValueAsset)
+                  ) +
+                  "$",
+              },
+            }
+          : {},
         { text: subtitleFor(portfolioEntry) },
         {
           tag: {
