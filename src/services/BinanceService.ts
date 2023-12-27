@@ -13,14 +13,29 @@ const clientTS = new SpotTS(APIKEY, APISECRET);
 
 class BinanceService {
   private marginAccount: any;
-  private priceAPIBTC: any;
+  private priceAPIBTC: number | undefined;
 
   constructor() {
     // Bind the method to the class instance
     this.getMarginPortfolio = this.getMarginPortfolio.bind(this);
   }
 
+  public async getTotalMarginPortfolio() {
+    this.priceAPIBTC = (await client.tickerPrice("BTC".concat("USDT"))).data.price;
+    this.marginAccount = (await client.marginAccount({ recvWindow: 6000 })).data;
+
+    return {
+      total: this.priceAPIBTC ? Number.parseFloat(this.marginAccount.totalNetAssetOfBtc) * this.priceAPIBTC : 0,
+      total24: 0,
+      assets: [],
+    };
+  }
+
   public async getMarginPortfolio() {
+    if (this.priceAPIBTC === undefined) {
+      this.priceAPIBTC = (await client.tickerPrice("BTC".concat("USDT"))).data.price;
+    }
+
     let allAssets: any[] = [];
     try {
       const res = await clientTS.dailyAccountSnapshot(AccountSnapshotType.MARGIN, {
@@ -36,13 +51,13 @@ class BinanceService {
           };
         }
       );
-      console.log(moment.unix(res.snapshotVos[res.snapshotVos.length - 1].updateTime / 1000).format("MM/DD/YYYY"));
     } catch (error) {
       console.log("error", error);
     }
+
     this.marginAccount = await client.marginAccount({ recvWindow: 6000 });
-    this.priceAPIBTC = await client.tickerPrice("BTC".concat("USDT"));
-    const total2 = this.marginAccount.data.totalNetAssetOfBtc * this.priceAPIBTC?.data.price;
+
+    const total2 = this.priceAPIBTC ? this.marginAccount.data.totalNetAssetOfBtc * this.priceAPIBTC : 0;
 
     let total24h = 0;
     let total = 0;
@@ -91,19 +106,19 @@ class BinanceService {
         );
 
         const stats30d = {
-          value: usdValue - price30d[0].open * available,
-          percent: 100 - (price30d[0].open * available * 100) / usdValue,
+          value: usdValue - price30d[0]?.open * available,
+          percent: 100 - (price30d[0]?.open * available * 100) / usdValue,
           changeAvaibility: currency.netAsset - allAssets.find((asset) => asset.asset === currency.asset)?.availibility,
           available: allAssets.find((asset) => asset.asset === currency.asset)?.availibility,
-          usdValueAsset: price30d[0].open,
+          usdValueAsset: price30d[0]?.open,
         };
 
         const stats7d = {
-          value: usdValue - price7d[0].open * available,
-          percent: 100 - (price7d[0].open * available * 100) / usdValue,
+          value: usdValue - price7d[0]?.open * available,
+          percent: 100 - (price7d[0]?.open * available * 100) / usdValue,
           changeAvaibility: currency.netAsset - allAssets.find((asset) => asset.asset === currency.asset)?.availibility,
           available: 0,
-          usdValueAsset: price7d[0].open,
+          usdValueAsset: price7d[0]?.open,
         };
 
         const price1h = await getBinanceDataByRequests(
@@ -113,11 +128,11 @@ class BinanceService {
           moment().subtract(1, "hours").format("YYYY-MM-DD HH:mm:ss")
         );
         const stats1h = {
-          value: usdValue - price1h[0].open * available,
-          percent: 100 - (price1h[0].open * available * 100) / usdValue,
+          value: usdValue - price1h[0]?.open * available,
+          percent: 100 - (price1h[0]?.open * available * 100) / usdValue,
           changeAvaibility: 0,
           available: 0,
-          usdValueAsset: price1h[0].open,
+          usdValueAsset: price1h[0]?.open,
         };
 
         return {

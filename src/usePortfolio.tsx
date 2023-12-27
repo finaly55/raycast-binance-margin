@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Toast, showToast } from "@raycast/api";
-import { PortfolioEntry, PortfolioState, TypeFilter } from "./models/portfolio";
+import { PortfolioState, TypeFilter } from "./models/portfolio";
 import { compareUSDTPlusValue, compareUSDTValue, isBinanceError } from "./utilities";
 import KucoinService from "./services/KucoinService";
 import BinanceService from "./services/BinanceService";
@@ -49,23 +49,17 @@ export function usePortfolio() {
 
   async function fetchPortfolio() {
     try {
-      let portfolio: PortfolioEntry[] = [];
-
-      const kucoinService = new KucoinService();
-      const kucoinPortfolioMarginAccount = await kucoinService.getMarginPortfolio();
-
-      const binanceService = new BinanceService();
-      const binancePortfolioMarginAccount = await binanceService.getMarginPortfolio();
-
-      const metamaskService = new MetamaskService();
-      const metamaskPortfolio = await metamaskService.getMarginPortfolio();
+      const [kucoinPortfolioMarginAccount, binancePortfolioMarginAccount, metamaskPortfolio] = await Promise.all([
+        new KucoinService().getMarginPortfolio(),
+        new BinanceService().getTotalMarginPortfolio(),
+        new MetamaskService().getMarginPortfolio(),
+      ]);
 
       const total = binancePortfolioMarginAccount.total + kucoinPortfolioMarginAccount.total + metamaskPortfolio.total;
-
       const total24h =
         binancePortfolioMarginAccount.total24 + kucoinPortfolioMarginAccount.total24h + metamaskPortfolio.total24h;
 
-      portfolio = [
+      const portfolio = [
         ...binancePortfolioMarginAccount.assets,
         ...kucoinPortfolioMarginAccount.assets,
         ...metamaskPortfolio.assets,
@@ -73,24 +67,49 @@ export function usePortfolio() {
 
       setState((oldState) => ({
         ...oldState,
-        isLoading: false,
+        isLoading: true,
         isLoadingAssets: false,
         portfolio,
         total,
         total24h,
       }));
 
-      sort();
-    } catch (error: any) {
-      let errorMsg;
+      // récupération des cryptos binance plus tard car prend beaucoup de temps
+      await fetchBinanceAssets();
+    } catch (error) {
       if (error instanceof Error) {
-        errorMsg = error.message;
-      } else if (isBinanceError(error)) {
-        errorMsg = error.statusMessage;
-      } else {
-        errorMsg = error.toString();
+        showToast(Toast.Style.Failure, error.message);
       }
-      showToast(Toast.Style.Failure, errorMsg);
+      setState((oldState) => ({
+        ...oldState,
+        isLoading: false,
+        isLoadingAssets: false,
+        portfolio: undefined,
+        sortByUSDTValue: false,
+      }));
+    }
+  }
+
+  async function fetchBinanceAssets() {
+    try {
+      const binancePortfolioMarginAccount = await new BinanceService().getMarginPortfolio();
+      const total24h = binancePortfolioMarginAccount.total24;
+      const portfolio = [...binancePortfolioMarginAccount.assets];
+
+      setState((oldState) => ({
+        ...oldState,
+        isLoading: false,
+        isLoadingAssets: false,
+        portfolio: oldState.portfolio ? [...oldState.portfolio, ...portfolio] : portfolio,
+        total24h,
+      }));
+
+      sort();
+    } catch (error) {
+      if (error instanceof Error) {
+        showToast(Toast.Style.Failure, error.message);
+      }
+
       setState((oldState) => ({
         ...oldState,
         isLoading: false,
