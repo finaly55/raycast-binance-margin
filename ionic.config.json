@@ -1,0 +1,7 @@
+{
+  "name": "binance",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "custom"
+}

@@ -18,7 +18,7 @@
   "preferences": [
     {
       "name": "binance_api_key",
-      "type": "password",
+      "type": "textfield",
       "required": true,
       "title": "Binance API Key",
       "description": "Generate on: https://www.binance.com/en/my/settings/api-management",
@@ -26,7 +26,7 @@
     },
     {
       "name": "binance_api_secret",
-      "type": "password",
+      "type": "textfield",
       "required": true,
       "title": "Binance API Secret",
       "description": "Generate on: https://www.binance.com/en/my/settings/api-management",
@@ -34,7 +34,7 @@
     },
     {
       "name": "kucoin_api_key",
-      "type": "password",
+      "type": "textfield",
       "required": false,
       "title": "Kucoin API Key",
       "description": "Generate on: https://www.kucoin.com/en/my/settings/api-management",
@@ -42,7 +42,7 @@
     },
     {
       "name": "kucoin_api_secret",
-      "type": "password",
+      "type": "textfield",
       "required": false,
       "title": "Kucoin API Secret",
       "description": "Generate on: https://www.kucoin.com/en/my/settings/api-management",
@@ -50,7 +50,7 @@
     },
     {
       "name": "kucoin_passphrase",
-      "type": "password",
+      "type": "textfield",
       "required": false,
       "title": "Kucoin passphrase",
       "description": "Generate on: https://www.kucoin.com/en/my/settings/api-management",
@@ -80,6 +80,9 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
-  }
+    "dev": "ray develop",
+    "ionic:build": "npm run build",
+    "ionic:serve": "npm run dev"
+  },
+  "version": "0.0.0"
 }

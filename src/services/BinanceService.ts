@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { getBinanceDataByRequests, getIcon } from "../utilities";
+import { calculerBeneficeNet, calculerMoyenneAchatVente, getBinanceDataByRequests, getIcon } from "../utilities";
 import moment from "moment";
 import { PortfolioEntry } from "../models/portfolio";
 import { AccountSnapshotType, RestMarketTypes, Spot as SpotTS } from "@binance/connector-typescript";
@@ -74,6 +74,7 @@ class BinanceService {
         const change_value = assets24h.find((cur: { symbol: string }) => cur.symbol === asset)?.priceChange * available;
 
         const priceAPI = await client.tickerPrice(asset);
+        const tradeList = await clientTS.getMarginAccountTradeList(asset);
         const price = priceAPI.data.price;
 
         const tradeToCurrency = currency.asset === "USDT" ? null : "BTC";
@@ -146,6 +147,31 @@ class BinanceService {
           stats7d,
           stats30d,
           stats1h,
+          trade: {
+            averageAchat: calculerMoyenneAchatVente(tradeList.filter((w) => w.isBuyer)),
+            averageVente: calculerMoyenneAchatVente(tradeList.filter((w) => !w.isBuyer)),
+            beneficeNet: calculerBeneficeNet(
+              tradeList.filter((w) => w.isBuyer),
+              tradeList.filter((w) => !w.isBuyer),
+              usdValue
+            ),
+            totalTrade: tradeList
+              .map((trade) => parseFloat(trade.price) * parseFloat(trade.qty))
+              .reduce((total, value) => {
+                if (value !== null && value !== undefined) {
+                  return total + value;
+                }
+                return total;
+              }, 0),
+            fees: tradeList
+              .map((trade) => parseFloat(trade.price) * parseFloat(trade.qty) * 0.001)
+              .reduce((total, value) => {
+                if (value !== null && value !== undefined) {
+                  return total + value;
+                }
+                return total;
+              }, 0),
+          },
         } as PortfolioEntry;
       } catch (error) {
         console.log(error);

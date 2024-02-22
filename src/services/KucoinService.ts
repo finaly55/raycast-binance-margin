@@ -1,6 +1,6 @@
 // @ts-ignore
 import * as API from "kucoin-node-sdk";
-import { getIcon } from "../utilities";
+import { arrondirNombre, getIcon } from "../utilities";
 class KucoinService {
   constructor() {
     API.init(require("../../config/kucoin"));
@@ -58,6 +58,11 @@ class KucoinService {
         totalBalance: 104,
         liability: 0,
       },
+      {
+        currency: "HNT", //
+        totalBalance: 101,
+        liability: 0,
+      },
     ];
 
     const assets = marginAccount.data.accounts
@@ -72,7 +77,7 @@ class KucoinService {
         const icon = getIcon(asset.currency);
 
         total += available * tickerAsset.last;
-        total24h += Math.round(tickerAsset.last * tickerAsset.changeRate * available);
+        total24h += arrondirNombre(tickerAsset.last * tickerAsset.changeRate * available);
 
         return {
           currency: asset.currency + "K",

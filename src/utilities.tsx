@@ -1,5 +1,5 @@
 import path from "path";
-import { BinanceError, PortfolioEntry, TypeFilter, TypeFilterAttribute } from "./models/portfolio";
+import { BinanceError, Portfolio, PortfolioEntry, PortfolioState, TypeFilterAttribute } from "./models/portfolio";
 import axios from "axios";
 import { environment } from "@raycast/api";
 import fs from "fs";
@@ -75,7 +75,7 @@ export function formatNombre(nombre: number | null): string {
     return "";
   }
   return (
-    Math.round(nombre)
+    arrondirNombre(nombre)
       .toString()
       .replace(/\B(?=(\d{3})+(?!\d))/g, " ") + "$"
   );
@@ -206,5 +206,92 @@ export function convertirDateEnTimestamp(dateISO: string): number | string {
     return timestamp;
   } catch (error: any) {
     return error.message;
+  }
+}
+
+export function getBorrowFromPortolio(portfolio: Portfolio) {
+  return portfolio
+    .map((asset) => {
+      if (asset.usdValue < 0) {
+        return asset.usdValue;
+      }
+      return 0; // Retourne 0 pour les valeurs non valides
+    })
+    .reduce((total, value) => {
+      if (value !== null && value !== undefined) {
+        return total + value; // Ajoute la valeur au total
+      }
+      return total; // Ne modifie pas le total pour les valeurs non valides
+    }, 0); // Initialisation du total à 0
+}
+
+export function getDeptTotal(total: number | null, totalBorrowed: number) {
+  return totalBorrowed ? "1," + (-(totalBorrowed * 100) / (total ?? 0)).toFixed(0) : 0;
+}
+
+export function getLibelleConvertirPercent(state: PortfolioState, portfolioEntry: PortfolioEntry, percent: number) {
+  return (
+    percent +
+    "% = " +
+    arrondirNombre((state.total! - state.usdBorrowed) * (percent / 100)) +
+    "$ soit " +
+    numberToString(arrondirNombre((state.total! - state.usdBorrowed) * (percent / 100) - portfolioEntry.usdValue)) +
+    "$"
+  );
+}
+
+export function calculerMoyenneAchatVente(achats: any[]): number {
+  let sommeProduits = 0;
+  let sommeQuantites = 0;
+
+  achats.forEach((achat) => {
+    const prix = parseFloat(achat.price);
+    const quantite = parseFloat(achat.qty);
+
+    sommeProduits += prix * quantite;
+    sommeQuantites += quantite;
+  });
+
+  const moyenneAchat = sommeProduits / sommeQuantites;
+  return moyenneAchat;
+}
+
+export function calculerBeneficeNet(achats: any[], ventes: any[], surplusActuel: number): number {
+  // Calcul du coût total des achats
+  const coutTotalAchats = achats.reduce((total, achat) => total + achat.price * achat.qty, 0);
+
+  // Calcul du produit total des ventes
+  const produitTotalVentes = ventes.reduce((total, vente) => total + vente.price * vente.qty, 0);
+
+  // Calcul du bénéfice brut
+  const beneficeBrut = produitTotalVentes - coutTotalAchats + surplusActuel;
+
+  // Calcul du bénéfice net en tenant compte des commissions, taxes, etc.
+  const beneficeNet = beneficeBrut; // Vous pouvez ajuster ce calcul en fonction de vos besoins
+
+  return beneficeNet;
+}
+
+export function arrondirNombre(nombre: number | null): number {
+  if (nombre) {
+    const partieEntiere = parseFloat(nombre.toString());
+
+    if (partieEntiere >= 100) {
+      return Math.round(partieEntiere);
+    } else if (partieEntiere >= 10) {
+      return parseFloat(partieEntiere.toFixed(1));
+    } else if (partieEntiere >= 0.1) {
+      return parseFloat(partieEntiere.toFixed(2));
+    } else if (partieEntiere >= 0.01) {
+      return parseFloat(partieEntiere.toFixed(3));
+    } else if (partieEntiere >= 0.001) {
+      return parseFloat(partieEntiere.toFixed(4));
+    } else if (partieEntiere >= 0.0001) {
+      return parseFloat(partieEntiere.toFixed(5));
+    } else {
+      return parseFloat(partieEntiere.toFixed(2));
+    }
+  } else {
+    return 0;
   }
 }

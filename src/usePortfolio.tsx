@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Toast, showToast } from "@raycast/api";
-import { PortfolioState, TypeFilter } from "./models/portfolio";
-import { compareUSDTPlusValue, compareUSDTValue, isBinanceError } from "./utilities";
+import { Portfolio, PortfolioState, TypeFilter } from "./models/portfolio";
+import { compareUSDTPlusValue, compareUSDTValue, getBorrowFromPortolio } from "./utilities";
 import KucoinService from "./services/KucoinService";
 import BinanceService from "./services/BinanceService";
 import MetamaskService from "./services/MetamaskService";
@@ -11,12 +11,15 @@ export function usePortfolio() {
     portfolio: undefined,
     total: null,
     total24h: null,
+    usdBorrowed: 0,
     isLoading: true,
     isLoadingAssets: true,
     sortByUSDTValue: true,
     type: "1d",
+    isPercentMode: false,
     sort,
     changeType,
+    changePercentMode,
   });
 
   useEffect(() => {
@@ -27,6 +30,13 @@ export function usePortfolio() {
     setState((oldState) => ({
       ...oldState,
       type,
+    }));
+  }
+
+  function changePercentMode(isPercentMode: boolean) {
+    setState((oldState) => ({
+      ...oldState,
+      isPercentMode,
     }));
   }
 
@@ -59,7 +69,7 @@ export function usePortfolio() {
       const total24h =
         binancePortfolioMarginAccount.total24 + kucoinPortfolioMarginAccount.total24h + metamaskPortfolio.total24h;
 
-      const portfolio = [
+      const portfolio: Portfolio = [
         ...binancePortfolioMarginAccount.assets,
         ...kucoinPortfolioMarginAccount.assets,
         ...metamaskPortfolio.assets,
@@ -96,13 +106,18 @@ export function usePortfolio() {
       const total24h = binancePortfolioMarginAccount.total24;
       const portfolio = [...binancePortfolioMarginAccount.assets];
 
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: false,
-        isLoadingAssets: false,
-        portfolio: oldState.portfolio ? [...oldState.portfolio, ...portfolio] : portfolio,
-        total24h,
-      }));
+      setState((oldState) => {
+        const newPortfolio = oldState.portfolio ? [...oldState.portfolio, ...portfolio] : portfolio;
+
+        return {
+          ...oldState,
+          isLoading: false,
+          isLoadingAssets: false,
+          usdBorrowed: getBorrowFromPortolio(newPortfolio),
+          portfolio: newPortfolio,
+          total24h,
+        };
+      });
 
       sort();
     } catch (error) {
